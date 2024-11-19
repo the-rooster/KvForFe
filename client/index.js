@@ -1,4 +1,16 @@
 
+function formatRequest(type, requestId, payload) {
+    return JSON.stringify({
+        type: type,
+        requestId: requestId,
+        payload: payload
+    });
+}
+
+function generateRequestId() {
+    return Math.random().toString(36).substring(10);
+}
+
 export const StegoBaseApp = {
     baseUrl: 'http://localhost:3000',
     apiKey: '',
@@ -25,14 +37,13 @@ export const StegoBaseApp = {
         return this;
     },
     get: function(path) {
-        this.ws.send(JSON.stringify({
-            type: "get",
-            requestId: Math.random().toString(36).substring(7),
-            payload: {
-                query: {
-                    path: path
-                }
-            }}))
+        const requestId = generateRequestId()
+
+        this.ws.send(formatRequest('get', requestId, {
+            query: {
+                path: path
+            }
+        }));
 
         // create a promise (with timeout) which will be resolved when the response is received
         return new Promise((resolve, reject) => {
@@ -48,31 +59,17 @@ export const StegoBaseApp = {
                 }
 
                 clearTimeout(timeout);
-                resolve(response.payload);
+                resolve(response);
             });
         });
     },
     list: function(path) {
-        this.ws.send(JSON.stringify({
-            type: "list",
-            requestId: Math.random().toString(36).substring(7),
-            payload: {
-                query: {
-                    path: path
-                }
-            }}))
-
-    },
-    set: function(path, value) {
-        this.ws.send(JSON.stringify({
-            type: "set",
-            requestId: Math.random().toString(36).substring(7),
-            payload: {
-                query: {
-                    path: path
-                },
-                value: value
-            }}))
+        const requestId = generateRequestId()
+        this.ws.send(formatRequest('list', requestId, {
+            query: {
+                path: path
+            }
+        }))
 
         return new Promise((resolve, reject) => {
             let timeout = setTimeout(() => {
@@ -87,20 +84,44 @@ export const StegoBaseApp = {
                 }
 
                 clearTimeout(timeout);
-                resolve(response.payload);
+                resolve(response);
+            });
+        })
+    },
+    set: function(path, value) {
+        const requestId = generateRequestId()
+        this.ws.send(formatRequest('set', requestId, {
+            query: {
+                path: path
+            },
+            value: value
+        }))
+
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => {
+                reject('timeout');
+            }, this.timeout);
+
+            this.ws.addEventListener('message', (event) => {
+                // check that request id matches
+                let response = JSON.parse(event.data);
+                if (response.requestId !== requestId) {
+                    return;
+                }
+
+                clearTimeout(timeout);
+                resolve(response);
             });
         });
     },
     update: function(path, value) {
-        this.ws.send(JSON.stringify({
-            type: "update",
-            requestId: Math.random().toString(36).substring(7),
-            payload: {
-                query: {
-                    path: path
-                },
-                value: value
-            }}))
+        const requestId = generateRequestId()
+        this.ws.send(formatRequest('update', requestId, {
+            query: {
+                path: path
+            },
+            value: value
+        }))
 
         return new Promise((resolve, reject) => {
             let timeout = setTimeout(() => {
@@ -115,19 +136,17 @@ export const StegoBaseApp = {
                 }
 
                 clearTimeout(timeout);
-                resolve(response.payload);
+                resolve(response);
             });
         })
     },
     delete: function(path) {
-        this.ws.send(JSON.stringify({
-            type: "delete",
-            requestId: Math.random().toString(36).substring(7),
-            payload: {
-                query: {
-                    path: path
-                }
-            }}))
+        const requestId = generateRequestId()
+        this.ws.send(formatRequest('delete', requestId, {
+            query: {
+                path: path
+            },
+        }))
 
         return new Promise((resolve, reject) => {
             let timeout = setTimeout(() => {
@@ -147,6 +166,7 @@ export const StegoBaseApp = {
         })
     },
     subscribe: function(path) {
+        // todo
         this.ws.send(JSON.stringify({
             type: "subscribe",
             requestId: Math.random().toString(36).substring(7),
@@ -157,6 +177,7 @@ export const StegoBaseApp = {
             }}))
     },
     unsubscribe: function(path) {
+        // todo
         this.ws.send(JSON.stringify({
             type: "unsubscribe",
             requestId: Math.random().toString(36).substring(7),
