@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const WSMessageType = z.enum(["subscribe", "unsubscribe", "get", "set", "update", "delete"])
+export const WSMessageType = z.enum(["subscribe", "unsubscribe", "get", "set", "list", "update", "delete"])
 export const WSMessage = z.object({
     type: WSMessageType,
     requestId: z.string(),

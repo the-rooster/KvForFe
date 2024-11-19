@@ -13,7 +13,24 @@ export async function get(wsMessage: unknown , ws: WSContext<WebSocket>, request
         return;
     }
 
-    const value = await Array.fromAsync(kv.list({ prefix: body.query.path }))
+    const value = await kv.get(body.query.path)
+    console.log(value)
+    ws.send(JSON.stringify({ requestId, value } as GetResponseType))
+}
+
+export async function list(wsMessage: unknown, ws: WSContext<WebSocket>, requestId: string) {
+    // decode message
+    let body : GetRequestType;
+    try {
+        body = GetRequest.parse(wsMessage);
+    // deno-lint-ignore no-explicit-any
+    } catch (error: any) {
+        ws.send(JSON.stringify({ error: error.toString(), requestId }));
+        return;
+    }
+
+    const value = Array.fromAsync(await kv.list({ prefix: body.query.path }));
+
     ws.send(JSON.stringify({ requestId, value } as GetResponseType))
 }
 
@@ -28,8 +45,10 @@ export async function set(wsMessage: unknown, ws: WSContext<WebSocket>, requestI
         return;
     }
 
+    const resp = await kv.set(body.query.path, body.value)
 
-    await kv.set(body.query.path, body.value)
+    console.log(resp)
+
     ws.send(JSON.stringify({ requestId: requestId } as GetResponseType))
 }
 

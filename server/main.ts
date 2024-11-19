@@ -3,7 +3,7 @@ import { upgradeWebSocket } from 'npm:hono/deno'
 import { onMessage } from "./session.ts";
 
 const app = new Hono()
-export const kv = await Deno.openKv()
+export const kv = await Deno.openKv("./kv-local.db")
 
 
 // todo: auth + crud routes

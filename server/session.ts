@@ -5,6 +5,7 @@ import { delete_, get, set, update } from "./crud.ts";
 import { watchChanges } from "./listeners.ts";
 
 export const onMessage = (event: MessageEvent, ws: WSContext<WebSocket>) => {
+    console.log('data', event.data);
     const wsMessage = WSMessage.parse(JSON.parse(event.data));
     const requestId = wsMessage.requestId;
     switch (wsMessage.type) {
