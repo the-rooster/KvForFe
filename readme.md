@@ -2,6 +2,6 @@ StegoBase is a blazingly fast client/server abstraction that gives backend for f
 written on top of the Deno KV (similar to Firestore).
 
 TODO:
-- listeners
-- auth
+- realtime listeners
+- auth (with multiple integrations)
 - rules engine (similar to firestore)
