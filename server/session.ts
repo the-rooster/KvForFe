@@ -8,6 +8,8 @@ export const onMessage = (event: MessageEvent, ws: WSContext<WebSocket>) => {
     console.log('data', event.data);
     const wsMessage = WSMessage.parse(JSON.parse(event.data));
     const requestId = wsMessage.requestId;
+
+    // TODO: auth and rules engine to check if user can perform action
     switch (wsMessage.type) {
         case WSMessageType.Values.subscribe:
             console.log("subscribe", wsMessage);
