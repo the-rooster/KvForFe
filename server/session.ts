@@ -2,6 +2,7 @@ import type { WSContext } from "hono/helper";
 import {z} from "zod";
 import { WSMessage, WSMessageType } from "./types.ts";
 import { delete_, get, set, update } from "./crud.ts";
+import { watchChanges } from "./listeners.ts";
 
 export const onMessage = (event: MessageEvent, ws: WSContext<WebSocket>) => {
     const wsMessage = WSMessage.parse(JSON.parse(event.data));
@@ -9,6 +10,7 @@ export const onMessage = (event: MessageEvent, ws: WSContext<WebSocket>) => {
     switch (wsMessage.type) {
         case WSMessageType.Values.subscribe:
             console.log("subscribe", wsMessage);
+            watchChanges(wsMessage.payload, ws, requestId);
             break;
         case WSMessageType.Values.unsubscribe:
             console.log("unsubscribe", wsMessage);
