@@ -1,6 +1,7 @@
 import type { WSContext } from "hono/helpers";
 import { DeleteRequest, GetRequest, GetRequestType, SetRequest, UpdateRequest, type DeleteRequestType, type GetResponseType, type SetRequestType, type UpdateRequestType } from "./types.ts";
 import { kv } from "./main.ts";
+import type { DeleteResponseType } from "./types.ts";
 
 export async function get(wsMessage: unknown , ws: WSContext<WebSocket>, requestId: string) {
     // decode message
@@ -14,7 +15,6 @@ export async function get(wsMessage: unknown , ws: WSContext<WebSocket>, request
     }
 
     const value = await kv.get(body.query.path)
-    console.log(value)
     ws.send(JSON.stringify({ requestId, value } as GetResponseType))
 }
 
@@ -30,7 +30,6 @@ export async function list(wsMessage: unknown, ws: WSContext<WebSocket>, request
     }
 
     const value = Array.fromAsync(await kv.list({ prefix: body.query.path }));
-
     ws.send(JSON.stringify({ requestId, value } as GetResponseType))
 }
 
@@ -45,10 +44,7 @@ export async function set(wsMessage: unknown, ws: WSContext<WebSocket>, requestI
         return;
     }
 
-    const resp = await kv.set(body.query.path, body.value)
-
-    console.log(resp)
-
+    await kv.set(body.query.path, body.value)
     ws.send(JSON.stringify({ requestId: requestId } as GetResponseType))
 }
 
@@ -67,7 +63,6 @@ export async function update(wsMessage: unknown, ws: WSContext<WebSocket>, reque
     const currentValue = await kv.get(body.query.path)
     const newValue = { ...currentValue, ...body.value }
     await kv.set(body.query.path, newValue)
-
     ws.send(JSON.stringify({ requestId: requestId } as GetResponseType))
 }
 
@@ -83,6 +78,6 @@ export async function delete_(wsMessage: unknown, ws: WSContext<WebSocket>, requ
     }
 
     await kv.delete(body.query.path)
-    ws.send(JSON.stringify({ requestId: requestId } as GetResponseType))
+    ws.send(JSON.stringify({ requestId: requestId } as DeleteResponseType))
 }
 

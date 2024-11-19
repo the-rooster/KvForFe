@@ -5,23 +5,22 @@ export const StegoBaseApp = {
     ws: null,
 
     init: function(
-        baseUrl = 'http://localhost:3000',
+        baseUrl = 'localhost:3000',
         apiKey = ''
     ) {
         this.baseUrl = baseUrl;
         this.apiKey = apiKey
 
-        this.ws = new WebSocket(`${this.baseUrl}/ws?apiKey=${this.apiKey}`);
-        this.ws.onopen = () => {
-            console.log('connected');
-        };
-        this.ws.onmessage = (event) => {
-            console.log(event.data);
-        };
+        console.log('connecting to', `ws://${this.baseUrl}/ws`);
+
+        this.ws = new WebSocket(`ws:/${baseUrl}/ws`);
+        this.ws.addEventListener('message', (event) => {
+            console.log('Message from server ', event.data);
+        });
+
 
         return this;
     },
-
     get: function(path) {
         this.ws.send(JSON.stringify({
             type: "get",
@@ -32,7 +31,16 @@ export const StegoBaseApp = {
                 }
             }}));
     },
-
+    list: function(path) {
+        this.ws.send(JSON.stringify({
+            type: "list",
+            requestId: Math.random().toString(36).substring(7),
+            payload: {
+                query: {
+                    path: path
+                }
+            }}));
+    },
     set: function(path, value) {
         this.ws.send(JSON.stringify({
             type: "set",
@@ -44,7 +52,6 @@ export const StegoBaseApp = {
                 value: value
             }}));
     },
-    
     update: function(path, value) {
         this.ws.send(JSON.stringify({
             type: "update",
@@ -55,8 +62,7 @@ export const StegoBaseApp = {
                 },
                 value: value
             }}));
-        },
-
+    },
     delete: function(path) {
         this.ws.send(JSON.stringify({
             type: "delete",
@@ -67,7 +73,6 @@ export const StegoBaseApp = {
                 }
             }}));
     },
-
     subscribe: function(path) {
         this.ws.send(JSON.stringify({
             type: "subscribe",
@@ -78,7 +83,6 @@ export const StegoBaseApp = {
                 }
             }}));
     },
-
     unsubscribe: function(path) {
         this.ws.send(JSON.stringify({
             type: "unsubscribe",
@@ -88,5 +92,5 @@ export const StegoBaseApp = {
                     path: path
                 },
             }}));
-        }
+    }
 }

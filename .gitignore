@@ -1,0 +1,6 @@
+# ignore all node_modules directories
+node_modules/
+
+# kv files for local
+kv-local.db
+kv-local.db-*
