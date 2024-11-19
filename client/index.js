@@ -3,19 +3,22 @@ export const StegoBaseApp = {
     baseUrl: 'http://localhost:3000',
     apiKey: '',
     ws: null,
+    timeout: 3000,
 
     init: function(
-        baseUrl = 'localhost:3000',
+        baseUrl = 'localhos,t:3000',
         apiKey = ''
+        timeout = 3000
     ) {
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl
         this.apiKey = apiKey
+        this.timeout = timeout
 
-        console.log('connecting to', `ws://${this.baseUrl}/ws`);
+        console.log('connecting to', `ws://${this.baseUrl}/ws`)
 
-        this.ws = new WebSocket(`ws:/${baseUrl}/ws`);
+        this.ws = new WebSocket(`ws:/${baseUrl}/ws`)
         this.ws.addEventListener('message', (event) => {
-            console.log('Message from server ', event.data);
+            console.log('Message from server ', event.data)
         });
 
 
@@ -29,7 +32,25 @@ export const StegoBaseApp = {
                 query: {
                     path: path
                 }
-            }}));
+            }}))
+
+        // create a promise (with timeout) which will be resolved when the response is received
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => {
+                reject('timeout');
+            }, this.timeout);
+
+            this.ws.addEventListener('message', (event) => {
+                // check that request id matches
+                let response = JSON.parse(event.data);
+                if (response.requestId !== requestId) {
+                    return;
+                }
+
+                clearTimeout(timeout);
+                resolve(response.payload);
+            });
+        });
     },
     list: function(path) {
         this.ws.send(JSON.stringify({
@@ -39,7 +60,8 @@ export const StegoBaseApp = {
                 query: {
                     path: path
                 }
-            }}));
+            }}))
+
     },
     set: function(path, value) {
         this.ws.send(JSON.stringify({
@@ -50,7 +72,24 @@ export const StegoBaseApp = {
                     path: path
                 },
                 value: value
-            }}));
+            }}))
+
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => {
+                reject('timeout');
+            }, this.timeout);
+
+            this.ws.addEventListener('message', (event) => {
+                // check that request id matches
+                let response = JSON.parse(event.data);
+                if (response.requestId !== requestId) {
+                    return;
+                }
+
+                clearTimeout(timeout);
+                resolve(response.payload);
+            });
+        });
     },
     update: function(path, value) {
         this.ws.send(JSON.stringify({
@@ -61,7 +100,24 @@ export const StegoBaseApp = {
                     path: path
                 },
                 value: value
-            }}));
+            }}))
+
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => {
+                reject('timeout');
+            }, this.timeout);
+
+            this.ws.addEventListener('message', (event) => {
+                // check that request id matches
+                let response = JSON.parse(event.data);
+                if (response.requestId !== requestId) {
+                    return;
+                }
+
+                clearTimeout(timeout);
+                resolve(response.payload);
+            });
+        })
     },
     delete: function(path) {
         this.ws.send(JSON.stringify({
@@ -71,7 +127,24 @@ export const StegoBaseApp = {
                 query: {
                     path: path
                 }
-            }}));
+            }}))
+
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => {
+                reject('timeout');
+            }, this.timeout);
+
+            this.ws.addEventListener('message', (event) => {
+                // check that request id matches
+                let response = JSON.parse(event.data);
+                if (response.requestId !== requestId) {
+                    return;
+                }
+
+                clearTimeout(timeout);
+                resolve(response.payload);
+            });
+        })
     },
     subscribe: function(path) {
         this.ws.send(JSON.stringify({
@@ -81,7 +154,7 @@ export const StegoBaseApp = {
                 query: {
                     path: path
                 }
-            }}));
+            }}))
     },
     unsubscribe: function(path) {
         this.ws.send(JSON.stringify({
@@ -91,6 +164,6 @@ export const StegoBaseApp = {
                 query: {
                     path: path
                 },
-            }}));
+            }}))
     }
 }
