@@ -6,11 +6,21 @@ import './App.css'
 
 const app = StegoBaseApp.init("localhost:8000","", {debug: true})
 
+type Message = {
+  name: string;
+  message: string;
+}
+
 function App() {
 
-  const [messages, setMessages] = useState<string[]>([]);
+  const [message, setMessage] = useState({
+    name: "",
+    message: ""
+  })
+
+  const [messages, setMessages] = useState<Message[]>([]);
   
-  const addMessage = async (message: string) => {
+  const addMessage = async () => {
     const messageId = Math.random().toString().substring(10);
     await app.set(["messages", messageId], message);
   }
@@ -38,33 +48,41 @@ function App() {
       </h1>
 
       <div>
-        <button onClick={async () => {
-          await addMessage("Hello, World!");
-          await getMessages();
-        }}>
-          Add Message
-        </button>
+
 
         <button onClick={async () => {
           await getMessages();
         }}>
           Get Messages
-
         </button>
 
-        <button onClick={async () => {
-          setMessages([]);
-        }}>
-          Clear Messages
-        </button>
+        {/* message */}
+        <div>
+          <input type="text" value={message.name} onChange={(e) => setMessage({...message, name: e.target.value})} />
+          <input type="text" value={message.message} onChange={(e) => setMessage({...message, message: e.target.value})} />
+          <button onClick={async () => {
+            // only send if name and message are not empty
+            if (!message.name || !message.message) {
+              return;
+            }
+
+            await addMessage();
+            await getMessages();
+            setMessage({name: "", message: ""});
+          }}>
+            Add Message
+          </button>
 
         <div>
           {messages.map((message: string,i) => {
-            return <div key={i}>{message}</div>
+            return <div key={i}>
+              {message.name}: {message.message}
+            </div>
           })}
         </div>
 
       </div>
+    </div>
 
     </>
   )

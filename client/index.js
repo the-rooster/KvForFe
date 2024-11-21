@@ -75,19 +75,16 @@ export const StegoBaseApp = {
         this.debug && StegoAppLogger.debug('get', path)
         const requestId = generateRequestId()
         this.ws.send(formatRequest('get', requestId, {
-            query: {
-                path: path
-            }
+            path: path
         }));
         return createWsResponsePromise(this.ws, requestId, this.timeout);
     },
-    list: function(path) {
-        this.debug && StegoAppLogger.debug('list', path)
+    list: function(start, end) {
+        this.debug && StegoAppLogger.debug('list', start, end)
         const requestId = generateRequestId()
         this.ws.send(formatRequest('list', requestId, {
-            query: {
-                path: path
-            }
+            start: start,
+            end: end
         }))
         return createWsResponsePromise(this.ws, requestId, this.timeout);
     },

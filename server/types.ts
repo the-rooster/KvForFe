@@ -9,7 +9,7 @@ export const WSMessage = z.object({
 
 
 export const Query = z.object({
-    path: z.array(z.union([z.string(), z.number()])),
+    path: z.array(z.any()),
 })
 
 export const BaseRequest = z.object({
@@ -21,13 +21,23 @@ export const BaseResponse = z.object({
 
 // crud
 export const GetRequest = BaseRequest.merge(z.object({
-    query: Query,
+    path: z.array(z.any()),
 }))
 export const GetResponse = BaseResponse.merge(z.object({
     value: z.unknown(),
 }))
 export type GetRequestType = z.infer<typeof GetRequest>
 export type GetResponseType = z.infer<typeof GetResponse>
+
+export const ListRequest = BaseRequest.merge(z.object({
+    start: z.array(z.any()), // start key
+    end: z.optional(z.array(z.any())), // end key
+}))
+export const ListResponse = BaseResponse.merge(z.object({
+    value: z.unknown(),
+}))
+export type ListRequestType = z.infer<typeof ListRequest>
+export type ListResponseType = z.infer<typeof ListResponse>
 
 export const SetRequest = BaseRequest.merge(z.object({
     query: Query,
