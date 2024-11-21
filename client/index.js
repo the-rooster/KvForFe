@@ -13,7 +13,7 @@ function generateRequestId() {
 
 function createWsResponsePromise(ws, requestId, timeout) {
     return new Promise((resolve, reject) => {
-        let timeout = setTimeout(() => {
+        let t = setTimeout(() => {
             reject('timeout');
         }, timeout);
         ws.addEventListener('message', (event) => {
@@ -21,7 +21,7 @@ function createWsResponsePromise(ws, requestId, timeout) {
             if (response.requestId !== requestId) {
                 return;
             }
-            clearTimeout(timeout);
+            clearTimeout(t);
             resolve(response);
         });
     });
@@ -52,13 +52,15 @@ export const StegoBaseApp = {
     init: function(
         baseUrl = 'localhos,t:3000',
         apiKey = '',
-        timeout = 3000,
-        debug = false
+        settings = {
+            timeout: 3000,
+            debug: false
+        }
     ) {
         this.baseUrl = baseUrl
         this.apiKey = apiKey
-        this.timeout = timeout
-        this.debug = debug
+        this.timeout = settings.timeout ? settings.timeout : 3000
+        this.debug = settings.debug ? settings.debug : false
 
         this.debug && StegoAppLogger.debug('connecting to', `ws://${this.baseUrl}/ws`)
 

@@ -4,7 +4,13 @@ import { kv } from "./main.ts";
 import type { UnsubscribeRequestType } from "./types.ts";
 import { UnsubscribeRequest } from "./types.ts";
 
-const listeners = new Map<string, Record<string, (value: unknown) => void>>();
+async function listenToChanges(ws: WSContext<WebSocket>, path: any[], listenerId: string) {
+    // set up watcher on query and send updates
+    for await (const res of kv.watch(path)) {
+        ws.send({ listenerId, value: res });
+    }
+
+}
 
 export async function watchChanges(wsMessage: unknown, ws: WSContext<WebSocket>, requestId: string) {
     // decode message

@@ -1,7 +1,7 @@
 import type { WSContext } from "hono/helper";
 import {z} from "zod";
 import { WSMessage, WSMessageType } from "./types.ts";
-import { delete_, get, set, update } from "./crud.ts";
+import { delete_, get, list, set, update } from "./crud.ts";
 import { watchChanges } from "./listeners.ts";
 
 export const onMessage = (event: MessageEvent, ws: WSContext<WebSocket>) => {
@@ -22,6 +22,10 @@ export const onMessage = (event: MessageEvent, ws: WSContext<WebSocket>) => {
             console.log("get", wsMessage);
             get(wsMessage.payload, ws, requestId);
             break;
+        case WSMessageType.Values.list:
+            console.log("list", wsMessage);
+            list(wsMessage.payload, ws, requestId);
+            break
         case WSMessageType.Values.set:
             console.log("set", wsMessage);
             set(wsMessage.payload, ws, requestId);

@@ -29,7 +29,8 @@ export async function list(wsMessage: unknown, ws: WSContext<WebSocket>, request
         return;
     }
 
-    const value = Array.fromAsync(await kv.list({ prefix: body.query.path }));
+    const value = await Array.fromAsync(await kv.list({ prefix: body.query.path }));
+    console.log(value)
     ws.send(JSON.stringify({ requestId, value } as GetResponseType))
 }
 
