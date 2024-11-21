@@ -1,12 +1,12 @@
 import { z } from "zod"
 
-export const WSMessageType = z.enum(["subscribe", "unsubscribe", "get", "set", "list", "update", "delete"])
+export const WSMessageTypeEnum = z.enum(["subscribe", "unsubscribe", "get", "set", "list", "update", "delete"])
 export const WSMessage = z.object({
-    type: WSMessageType,
+    type: WSMessageTypeEnum,
     requestId: z.string(),
     payload: z.unknown(),
 })
-
+export type WSMessageType = z.infer<typeof WSMessage>
 
 export const Query = z.object({
     path: z.array(z.any()),

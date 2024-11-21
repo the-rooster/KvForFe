@@ -1,7 +1,7 @@
 import type { WSContext } from "hono/helpers";
 import { WatchChangesRequest, type WatchChangesRequestType } from "./types.ts";
 import { kv } from "./main.ts";
-import type { UnsubscribeRequestType } from "./types.ts";
+import type { UnsubscribeRequestType, WSMessageType } from "./types.ts";
 import { UnsubscribeRequest } from "./types.ts";
 
 async function listenToChanges(ws: WSContext<WebSocket>, path: any[], listenerId: string) {
@@ -23,6 +23,7 @@ export async function watchChanges(wsMessage: unknown, ws: WSContext<WebSocket>,
         return;
     }
 
+
     const listenerId = crypto.randomUUID();
 
     /*
@@ -31,26 +32,24 @@ export async function watchChanges(wsMessage: unknown, ws: WSContext<WebSocket>,
         - if a unsubscribe message is received on the samee listenerId kv entry, remove the listener
     */
 
-    // set up watcher on query and send updates
-    for await (const res of kv.watch([body.query.path])) {
-        ws.send({ listenerId, value: res });
-    }
-}
+    // set up watcher on query and send updates. create a promise race with a promise that resolves when a message is received on the same listenerId
+    await Promise.race([
+        listenToChanges(ws, body.query.path, listenerId),
+        new Promise((resolve) => {
+            ws.onmessage((message : WSMessageType) => {
+                let wsMessage: UnsubscribeRequestType;
+                try {
+                    // deno-lint-ignore no-explicit-any
+                    wsMessage = UnsubscribeRequest.parse(JSON.parse(message.payload as any));
+                }
+                catch {
+                    return;
+                }
 
-export async function unwatchChanges(wsMessage: unknown, ws: WSContext<WebSocket>) {
-    // decode message
-    let body: UnsubscribeRequestType
-    try {
-        body = UnsubscribeRequest.parse(wsMessage);
-    // deno-lint-ignore no-explicit-any
-    } catch (error: any) {
-        ws.send(JSON.stringify({ error: error.toString() }));
-        return;
-    }
-
-    const listenerId = body.listenerId;
-
-
-    // TODO: this should send a message to the kv store to remove the listener
-    ws.send(JSON.stringify({ listenerId }));
+                if (message.type === "unsubscribe" && wsMessage.listenerId === listenerId) {
+                    resolve(0);
+                }
+            });
+        }),
+    ]);
 }
